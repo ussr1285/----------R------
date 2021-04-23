@@ -1,0 +1,92 @@
+# 이민영 지니 데이터 가져오기 (사랑의콜센타)
+
+```{r}
+library(httr)
+library(rvest)
+library(RSelenium)
+
+remD <- remoteDriver(port = 4445L, browserName = "chrome")
+remD$open()
+
+
+
+```{r}
+### 함수 시작 ()
+remD$navigate(paste0("https://www.genie.co.kr/search/searchSong?query=", a))
+html <- remD$getPageSource()[[1]]
+html <- read_html(html)
+
+title <- NULL
+artist <- NULL
+number <- NULL
+
+
+artist <- html %>% html_nodes(".info .artist") %>%
+  html_text()
+artist <- gsub("\n", "", artist)
+artist <- trimws(artist) 
+
+number <- html %>% html_nodes("tbody > tr") %>%
+  html_attrs()
+
+for(i in 1:length(number)){
+  number[[i]] <- number[[i]][2]
+}
+number <- gsub("songid", "", number)
+
+df <- data.frame(number, artist)
+df
+
+library(dplyr)
+
+genre <- c()
+title <- c()
+heart <- c()
+t.listener <- c()
+t.listen <- c()
+
+
+for(i in df$number){
+  url <- paste0("http://www.genie.co.kr/detail/songInfo?xgnm=", i)
+
+  url_n <- read_html(url)
+  
+  genres_nodes_n <- html_nodes(url_n, 'li>span.value')
+  genres_n <- html_text(genres_nodes_n)
+  
+  genre <- append(genre, genres_n[3])
+  
+  title_nodes_n <- html_nodes(url_n, '#body-content > div.song-main-infos > div.info-zone > h2')
+  title_n <- html_text(title_nodes_n)
+  title_n <- gsub("\n", "", title_n)
+  title_n <- trimws(title_n)
+  title <- append(title, title_n)
+  
+  heart_nodes_n <- html_nodes(url_n, '#emLikeCount')
+  heart_n <- html_text(heart_nodes_n)
+  heart <- append(heart, heart_n)
+  
+  heart_nodes_n <- html_nodes(url_n, '#emLikeCount')
+  heart_n <- html_text(heart_nodes_n)
+  heart <- append(heart, heart_n)
+  
+  t.listener_nodes_n <- html_nodes(url_n, '#body-content > div.song-main-infos > div.aside-zone.daily-chart > div.total > div:nth-child(1) > p')
+  t.listener_n <- html_text(t.listener_nodes_n)
+  t.listener <- append(t.listener, t.listener_n) 
+  
+  t.listen_nodes_n <- html_nodes(url_n, '#body-content > div.song-main-infos > div.aside-zone.daily-chart > div.total > div:nth-child(2) > p')
+  t.listen_n <- html_text(t.listen_nodes_n)
+  t.listen <- append(t.listen, t.listen_n)
+  
+
+}
+df <- data.frame(df, title, genre, heart, t.listener, t.listen)
+return(df)
+### 함수 끝
+
+```
+
+```{r}
+love_call_center <- 함수이름("사랑의콜센타")
+
+```

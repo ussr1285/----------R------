@@ -1,0 +1,133 @@
+# 박예지 쇼미더머니 Vs 트로트
+
+```{r}
+#install.packages("httr")
+#install.packages("rvest")
+#install.packages("stringr")
+#install.packages("xml2")
+#install.packages("dplyr")
+install.packages("Rselenium")
+```
+
+```{r}
+install.packages("Rselenium")
+library(httr)
+library(rvest)
+library(stringr)
+library(xml2)
+library(dplyr)
+library(Rselenium)
+```
+
+#지니 크롤링
+
+<방영 날짜>
+-미스터트롯 : 2020.01.02~2020.03.12
+-쇼미더머니8: 2019.07.26~2019.09.27
+-쇼미더머니9: 2020.10.16~2020.12.18
+
+=>지니 "월간"차트 Top200에 대해서 미스터 트롯(혹은 트로트 장르),쇼미더머니(혹은 힙합 장르) 곡의 개수를 group1,2 table 생성 후 t-test 돌리기! 
+
+=>미스터트롯과 쇼미더머니 방영 기간이 최대한 겹치는 2019년 9월부터 현재 2021년 3월까지의 총 19개월의 차트를 분석하기로 한다. 
+ex) grop1(미스터트롯) 4,5,29,59,69
+ex) group2(쇼미더머니)3,4,66,73,23
+
+=>크롤링해야할 것 : 월간 T0P200 차트 + 노래 제목 + 가수 + 장르 
+
+```{r}
+library(httr)
+
+library(rvest)
+
+ 
+
+url = 'https://www.melon.com/chart/'
+
+get_url = GET(url)
+```
+
+#장르 추출
+```{r}
+#GET 함수로 서버에 정보 요청하기
+url = 'https://www.melon.com/chart/month/index.htm'
+get_url = GET(url)
+
+#read_html 함수로 html 코드 읽기
+my_html=read_html(get_url,encoding='utf-8')
+
+#ellipsis rank01 클래스만 추출
+pickA=html_nodes(my_html,'wrap')
+
+#a 태그만 추출
+pickb=html_nodes(picka,'a')
+
+#텍스트 추출
+pickc=html_text(picka,trim=TRUE)
+
+#top100순위
+print(pickc)
+```
+
+-<지니>
+```{r}
+library(httr)
+library(rvest)
+library(stringr)
+library(xml2)
+library(dplyr)
+library(Rselenium)
+library(RSelenium)
+library(seleniumPipes)
+library(rvest)
+library(httr)
+library(stringr)
+```
+
+https://www.genie.co.kr/chart/top200?ditc=M&rtm=N&ymd=20210301
+#월별 국내 TOP200 차트를 들고오기 위한 주소 만들기
+```{r}
+ymd=c(20210301,20210201,20210301)
+url = paste0("https://www.genie.co.kr/chart/top200?ditc=M&rtm=N&ymd",ymd)
+url
+```
+#제목+가수
+```{r}
+url = "https://www.genie.co.kr/chart/top200?ditc=M&rtm=N&ymd20210301"
+get_url = GET(url)
+
+#read_html 함수로 html 코드 읽기
+my_html=read_html(get_url,encoding='utf-8')
+
+#ellipsis rank01 클래스만 추출
+pick1=html_nodes(my_html,'.info')
+
+#a 태그만 추출
+pick2=html_nodes(pick1,'a')
+
+#텍스트 추출
+pick3=html_text(pick1,trim=TRUE)
+
+#top100순위
+print(pick3)
+```
+#songID
+<a href="#" class="btn-basic btn-info" onclick="fnViewSongInfo('86992414');return false;">곡 제목 정보 페이지</a>
+
+```{r}
+url = "https://www.genie.co.kr/chart/top200?ditc=M&rtm=N&ymd20210301"
+get_url = GET(url)
+
+#read_html 함수로 html 코드 읽기
+my_html=read_html(get_url,encoding='utf-8')
+
+#ellipsis rank01 클래스만 추출
+picka=html_nodes(my_html,'.link')
+
+pickb=html_text2(picka)
+#a 태그만 추출
+#pickb=html_nodes(picka,'td')
+
+print(picka)
+
+#top100순위
+#print(pickc)
